@@ -8,30 +8,23 @@ export default () => {
     }
 
     function analyze(str) {
-        blockEventLoop(1000);
+        blockEventLoop(800);
         const mostRepeatedWordInfo = findMostRepeatedWord(str);
 
         return {
             wordCount: countWords(str),
             charCount: countChars(str),
-            lineCount: countLines(str),
-            mostRepeatedWord: mostRepeatedWordInfo.mostRepeatedWord,
-            mostRepeatedWordCount: mostRepeatedWordInfo.mostRepeatedWordCount
+            mostRepeatedWord: mostRepeatedWordInfo.mostRepeatedWord
         };
     }
 
     function countWords(str) {
         str = str.trim();
-
         return str === "" ? 0 : str.split(/\s+/).length;
     }
 
     function countChars(str) {
         return str.length;
-    }
-
-    function countLines(str) {
-        return str.trim() === "" ? 0 : str.split("\n").length;
     }
 
     function findMostRepeatedWord(str) {
@@ -55,10 +48,8 @@ export default () => {
         return result;
     }
 
-
     self.addEventListener('message', e => { // eslint-disable-line no-restricted-globals
         if (!e) return;
-
         postMessage(analyze(e.data));
     })
 }

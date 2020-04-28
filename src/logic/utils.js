@@ -3,7 +3,7 @@
 export function blockPromise() {
     return new Promise(resolve => {
         console.log('event loop blocked!');
-        blockEventLoop(1000);
+        blockEventLoop(800);
         console.log('event loop free!');
         resolve();
     })
@@ -16,7 +16,7 @@ export function blockEventLoop(blockTime) {
 }
 
 export function analyze(str) {
-    blockEventLoop(1000);
+    blockEventLoop(800);
     const mostRepeatedWordInfo = findMostRepeatedWord(str);
 
     return {

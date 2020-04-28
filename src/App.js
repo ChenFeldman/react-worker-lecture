@@ -1,14 +1,20 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import { blockPromise } from './logic/utils';
 import worker from './app.worker.js';
 import WebWorker from './WebWorker';
+import DemoComponent from './DemoComponent';
+import { analyze } from './logic/utils';
+
 let localWorker;
 
-function App() {
+const TAB_TYPES = {
+  SYNC: 'SYNC',
+  WORKER: 'WORKER'
+}
 
-  let textRef = useRef();
-  const [wordsData, setWordsData] = useState({
+function App() {
+  const [currentTab, setCurrentTab] = useState(TAB_TYPES.SYNC);
+  const [wordsDataWorker, setWordsDataWorker] = useState({
     wordCount: 0,
     charCount: 0,
     lineCount: 0,
@@ -17,37 +23,56 @@ function App() {
   });
 
   useEffect(() => {
-      localWorker = new WebWorker(worker);
-      localWorker.addEventListener('message', event => {
-        console.log('hey', event.data);
-        try {
-          setWordsData(event.data);
-        }
-        catch (err) {
+    localWorker = new WebWorker(worker);
+    localWorker.addEventListener('message', event => {
+      try {
+        setWordsDataWorker(event.data);
+      }
+      catch (err) {
 
-        }
-      });
+      }
+    });
 
-  },[]);
+  }, []);
 
-  const handleKeyUp = (event) => {
-    const currentText = textRef.current.value;
+  const handleKeyUpWorker = (currentText) => {
     localWorker.postMessage(currentText);
   }
 
+  const [wordsData, setWordsData] = useState({
+    wordCount: 0,
+    charCount: 0,
+    lineCount: 0,
+    mostRepeatedWord: '',
+    mostRepeatedWordCount: 0
+  });
+
+  const handleKeyUp = (currentText) => {
+    let analyzedText = analyze(currentText);
+    setWordsData(analyzedText);
+  }
+
+  const switchToTab = (tabType) => {
+    setCurrentTab(tabType);
+  }
+
+  const renderCurrentTab = () => {
+    if (currentTab === TAB_TYPES.WORKER){
+      return (<DemoComponent handleKeyUp={handleKeyUpWorker} wordsData={wordsDataWorker} />)
+    }
+    else{
+      return (<DemoComponent handleKeyUp={handleKeyUp} wordsData={wordsData} />)
+    }
+  }
+
   return (
-    <div className="App">
-      <textarea ref={textRef} id="text" rows="10" cols="150" placeholder="Start writing..." onKeyUp={handleKeyUp}>
-      </textarea>
-      <div>
-        <p>Word count: <span id="wordCount">{wordsData.wordCount}</span></p>
-        <p>Character count: <span id="charCount">{wordsData.charCount}</span></p>
-        <p>Line count: <span id="lineCount" >{wordsData.lineCount}</span></p>
-  <p>Most repeated word: <span id="mostRepeatedWord" >{wordsData.mostRepeatedWord}</span> (<span id="mostRepeatedWordCount" >{wordsData.mostRepeatedWordCount}</span>
-          occurrences)</p>
+    <>
+      <div id='tabs'>
+      <button class='demo-button' style={{backgroundColor: currentTab === TAB_TYPES.SYNC ? '#348BD8' : 'white'}}  onClick={() => switchToTab(TAB_TYPES.SYNC)}>Sync</button> 
+      <button class='demo-button'style={{backgroundColor: currentTab === TAB_TYPES.WORKER ? '#348BD8' : 'white'}} onClick={() => switchToTab(TAB_TYPES.WORKER)}>Worker</button>
       </div>
-      <button>Interact With Me</button>
-    </div>
+      {renderCurrentTab()}
+    </>
   );
 }
 
