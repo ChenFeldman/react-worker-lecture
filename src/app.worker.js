@@ -9,44 +9,21 @@ export default () => {
 
     function analyze(str) {
         blockEventLoop(800);
-        const mostRepeatedWordInfo = findMostRepeatedWord(str);
 
         return {
-            wordCount: countWords(str),
-            charCount: countChars(str),
-            mostRepeatedWord: mostRepeatedWordInfo.mostRepeatedWord
+            wordsAmount: getWordsAmount(str),
+            charactersAmount: getCharactersAmount(str)
         };
     }
 
-    function countWords(str) {
-        str = str.trim();
-        return str === "" ? 0 : str.split(/\s+/).length;
+    function getWordsAmount(text) {
+        return text.split(' ').length;
     }
 
-    function countChars(str) {
-        return str.length;
+    function getCharactersAmount(text) {
+        return text.length;
     }
 
-    function findMostRepeatedWord(str) {
-        let words = {};
-        let result = {
-            mostRepeatedWord: "",
-            mostRepeatedWordCount: 0
-        };
-
-        str.match(/\w+/g).forEach(function (w) {
-            words[w] = (words[w] || 0) + 1
-        });
-
-        for (var w in words) {
-            if (!(words[w] < result.mostRepeatedWordCount)) {
-                result.mostRepeatedWordCount = words[w];
-                result.mostRepeatedWord = w;
-            }
-        }
-
-        return result;
-    }
 
     self.addEventListener('message', e => { // eslint-disable-line no-restricted-globals
         if (!e) return;

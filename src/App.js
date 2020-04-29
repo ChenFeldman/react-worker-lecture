@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import worker from './app.worker.js';
-import WebWorker from './WebWorker';
+import WebWorkerWrapper from './WebWorker';
 import DemoComponent from './DemoComponent';
 import { analyze } from './logic/utils';
 
@@ -15,24 +15,24 @@ const TAB_TYPES = {
 function App() {
   const [currentTab, setCurrentTab] = useState(TAB_TYPES.SYNC);
   const [wordsDataWorker, setWordsDataWorker] = useState({
-    wordCount: 0,
-    charCount: 0,
-    lineCount: 0,
-    mostRepeatedWord: '',
-    mostRepeatedWordCount: 0
+    wordsAmount: 0,
+    charactersAmount: 0
   });
 
   useEffect(() => {
-    localWorker = new WebWorker(worker);
+    localWorker = new WebWorkerWrapper(worker);
     localWorker.addEventListener('message', event => {
       try {
         setWordsDataWorker(event.data);
       }
       catch (err) {
-
+        console.log(`Erro while setting new data from worker ${err}`);
       }
     });
 
+    return (()=>{
+      localWorker.terminate();
+    })
   }, []);
 
   const handleKeyUpWorker = (currentText) => {
@@ -40,16 +40,15 @@ function App() {
   }
 
   const [wordsData, setWordsData] = useState({
-    wordCount: 0,
-    charCount: 0,
-    lineCount: 0,
-    mostRepeatedWord: '',
-    mostRepeatedWordCount: 0
+    wordsAmount: 0,
+    charactersAmount: 0
   });
 
   const handleKeyUp = (currentText) => {
-    let analyzedText = analyze(currentText);
-    setWordsData(analyzedText);
+    let analyzedText = analyze(currentText)
+    analyzedText.then(result => {
+      setWordsData(result);
+    })
   }
 
   const switchToTab = (tabType) => {
@@ -57,10 +56,10 @@ function App() {
   }
 
   const renderCurrentTab = () => {
-    if (currentTab === TAB_TYPES.WORKER){
+    if (currentTab === TAB_TYPES.WORKER) {
       return (<DemoComponent handleKeyUp={handleKeyUpWorker} wordsData={wordsDataWorker} />)
     }
-    else{
+    else {
       return (<DemoComponent handleKeyUp={handleKeyUp} wordsData={wordsData} />)
     }
   }
@@ -68,8 +67,8 @@ function App() {
   return (
     <>
       <div id='tabs'>
-      <button class='demo-button' style={{backgroundColor: currentTab === TAB_TYPES.SYNC ? '#348BD8' : 'white'}}  onClick={() => switchToTab(TAB_TYPES.SYNC)}>Sync</button> 
-      <button class='demo-button'style={{backgroundColor: currentTab === TAB_TYPES.WORKER ? '#348BD8' : 'white'}} onClick={() => switchToTab(TAB_TYPES.WORKER)}>Worker</button>
+        <button class='demo-button' style={{ backgroundColor: currentTab === TAB_TYPES.SYNC ? '#348BD8' : 'white' }} onClick={() => switchToTab(TAB_TYPES.SYNC)}>Sync</button>
+        <button class='demo-button' style={{ backgroundColor: currentTab === TAB_TYPES.WORKER ? '#348BD8' : 'white' }} onClick={() => switchToTab(TAB_TYPES.WORKER)}>Worker</button>
       </div>
       {renderCurrentTab()}
     </>

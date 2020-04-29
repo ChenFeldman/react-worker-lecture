@@ -25,7 +25,6 @@ function DemoComponent(props) {
     }
 
     const handleKeyUp = () => {
-        // setTypingText('Analyzing Text..Please Wait!');
         wordsRef.current.style.backgroundColor = 'gray';
         setTimeout(() => {
             const currentText = textRef.current.value;
@@ -56,9 +55,8 @@ function DemoComponent(props) {
                     </textarea>
                     <h1 style={{ color: 'purple' }}>{typingText}</h1>
                     <div ref={wordsRef}>
-                        <p><b>Analyzed Words </b><span id="wordCount">{props.wordsData.wordCount}</span></p>
-                        <p><b>Analyzed Characters </b><span id="charCount">{props.wordsData.charCount}</span></p>
-                        <p><b>Most repeated word: </b><span id="mostRepeatedWord" >{props.wordsData.mostRepeatedWord}</span></p>
+                        <p><b>Analyzed Words </b><span id="wordCount">{props.wordsData.wordsAmount}</span></p>
+                        <p><b>Analyzed Characters </b><span id="charCount">{props.wordsData.charactersAmount}</span></p>
                     </div>
                     <button class='demo-button' onClick={handleButtonClick}>Calculate</button>
                     <h2>{buttonActionResult}</h2>
